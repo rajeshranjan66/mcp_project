@@ -1,14 +1,17 @@
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from langchain_community.tools.tavily_search import TavilySearchResults
-
+import os
 
 load_dotenv()
+
+# Define freshness_hours (e.g., from an environment variable or as a constant)
+#freshness_hours = os.getenv("FRESHNESS_HOURS", "1")  # Default to 24 hours if not set
 
 mcp = FastMCP("WebCrawlerMCP", "1.0.0", "A server to crawl web pages and extract data using Tavli API.")
 
 @mcp.tool()
-def crawl_web_page(query: str) -> dict:
+def crawl_web_page(query: str, freshness_hours: int = 1) -> dict:
     """
     Crawl a web page or perform a search using the Tavily API.
     Args:
@@ -17,15 +20,14 @@ def crawl_web_page(query: str) -> dict:
         dict: The search results or extracted content.
     """
     try:
-        # Initialize TavilySearchResults with a maximum of 3 results
+
         search = TavilySearchResults(max_results=3)
-        # Perform the search using the query
-        search_results = search.invoke(query)
-        # Return the search results
-        return {"query": query, "results": search_results}
+        return search.invoke({
+            "query": query,
+            "freshness": f"{freshness_hours}h"
+        })
     except Exception as e:
         return {"error": str(e)}
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
-
