@@ -44,17 +44,15 @@ def fetch_annual_financials(symbol: str) -> DataFrame:
 
 @mcp.tool()
 def get_stock_price(symbol: str) -> float:
-
-    """Get the current stock price.
+    """Get the latest trading price (regular market price)
     Args:
         symbol (str): Stock symbol of the company.
         Returns:
             float: The current stock price.
     """
     ticker = yf.Ticker(symbol)
-    data = ticker.history(period="1d")
-    price = data['Close'].iloc[-1]
-    return float(price)
+    current_price = ticker.info["regularMarketPrice"]
+    return float(current_price)
 @mcp.tool()
 def get_stock_history(symbol: str, period: str = "1mo") -> DataFrame:
     """Get stock price history for a given period.
